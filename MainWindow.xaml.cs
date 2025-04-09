@@ -136,6 +136,7 @@ namespace FeedFetcher
                 if (IsValid)
                 {
                     LicenseBorder.Visibility = Visibility.Collapsed;
+                    this.Background = new SolidColorBrush(Color.FromRgb(91, 140, 144));
                     HomeGrid.Visibility = Visibility.Visible;
                     Status.Visibility = Visibility.Collapsed;
                     Status.Text = string.Empty;
@@ -143,7 +144,9 @@ namespace FeedFetcher
                 }
                 else
                 {
+                    this.Background = new SolidColorBrush(Colors.Transparent);
                     LicenseBorder.Visibility = Visibility.Visible;
+                    LicenseBorder.Background = new SolidColorBrush(Color.FromRgb(91, 140, 144));
                     HomeGrid.Visibility = Visibility.Collapsed;
                     Status.Visibility = Visibility.Visible;
                     Status.Text = "Failed to validate...";

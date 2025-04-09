@@ -21,14 +21,4 @@
         public string CookieString { get; set; }
         public string Status { get; set; }
     }
-    public class FeedModel
-    {
-        public int Index { get; set; }
-        public string FeedInfo { get; set; }
-        public UserFeedDetails FeedDetails { get; set; } = new UserFeedDetails();
-    }
-    public class UserFeedDetails
-    {
-
-    }
 }
