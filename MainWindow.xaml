@@ -5,146 +5,224 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:FeedFetcher"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="Instagram Feed Fetcher"
+    Title="Instagram"
     Width="800"
     Height="450"
+    Background="#5b8c90 "
+    Closing="WhileClosing"
     Icon="IG.ico"
     WindowStartupLocation="CenterScreen"
     WindowState="Maximized"
     mc:Ignorable="d">
     <Grid x:Name="MainGrid">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-        <TextBlock
-            Margin="0,10"
+        <Border
+            x:Name="LicenseBorder"
+            Grid.RowSpan="2"
+            Width="400"
             HorizontalAlignment="Center"
-            FontFamily="Arial Narrow"
-            FontSize="18"
-            Text="License Valid Upto : -" />
-        <ScrollViewer Grid.Row="1">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                <Expander
-                    Grid.Row="0"
-                    Margin="10"
-                    Header="Input"
-                    IsExpanded="True">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <StackPanel Grid.Row="0" Orientation="Vertical">
-                            <StackPanel Orientation="Horizontal">
-                                <Label VerticalAlignment="Center" Content="Enter Session" />
-                                <TextBox
-                                    x:Name="SessionTextBox"
-                                    MinWidth="200"
-                                    MinHeight="50"
-                                    MaxWidth="300"
-                                    MaxHeight="100"
-                                    Margin="10,5"
-                                    VerticalContentAlignment="Center"
-                                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                    TextWrapping="Wrap" />
-                                <Button
-                                    x:Name="SessionButton"
-                                    Margin="5,0,5,0"
-                                    Padding="5"
-                                    VerticalAlignment="Center"
-                                    Command="{Binding AddSession}"
-                                    CommandParameter="{Binding ElementName=SessionTextBox}"
-                                    Content="Add Session" />
+            VerticalAlignment="Center"
+            BorderBrush="White"
+            BorderThickness="2"
+            CornerRadius="30,0,30,0">
+            <StackPanel Margin="10,0" Orientation="Vertical">
+                <Image
+                    Width="100"
+                    Height="100"
+                    Margin="0,20"
+                    Source="AIBot.png" />
+                <Label
+                    Margin="10,0,10,0"
+                    Content="Enter License Key"
+                    FontSize="16"
+                    Foreground="White" />
+                <Border
+                    MinWidth="200"
+                    Margin="10,5"
+                    Background="White"
+                    BorderBrush="White"
+                    BorderThickness="2"
+                    CornerRadius="5">
+                    <TextBox
+                        x:Name="LicenseKey"
+                        Margin="2"
+                        HorizontalContentAlignment="Left"
+                        VerticalContentAlignment="Center"
+                        BorderBrush="Transparent"
+                        BorderThickness="0" />
+                </Border>
+                <TextBlock
+                    x:Name="Status"
+                    HorizontalAlignment="Center"
+                    FontSize="14"
+                    Foreground="White" />
+                <Border
+                    MinWidth="200"
+                    Margin="10,10,10,20"
+                    BorderBrush="SkyBlue"
+                    BorderThickness="2"
+                    CornerRadius="5">
+                    <Button
+                        Padding="8"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Click="Vl"
+                        Content="Verify License"
+                        Cursor="Hand"
+                        Foreground="White" />
+                </Border>
+            </StackPanel>
+        </Border>
+        <Grid x:Name="HomeGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock
+                x:Name="LValid"
+                Margin="0,10"
+                HorizontalAlignment="Center"
+                FontFamily="Arial Narrow"
+                FontSize="18"
+                FontWeight="DemiBold"
+                Foreground="White"
+                Text="License Valid Upto : -" />
+            <ScrollViewer Grid.Row="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Expander
+                        Grid.Row="0"
+                        Margin="10"
+                        Header="Input"
+                        IsExpanded="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal">
+                                    <Label VerticalAlignment="Center" Content="Enter Session" />
+                                    <TextBox
+                                        x:Name="SessionTextBox"
+                                        MinWidth="200"
+                                        MinHeight="50"
+                                        MaxWidth="300"
+                                        MaxHeight="100"
+                                        Margin="10,5"
+                                        VerticalContentAlignment="Center"
+                                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        TextWrapping="Wrap" />
+                                    <Button
+                                        x:Name="SessionButton"
+                                        Margin="5,0,5,0"
+                                        Padding="5"
+                                        VerticalAlignment="Center"
+                                        Command="{Binding AddSession}"
+                                        CommandParameter="{Binding ElementName=SessionTextBox}"
+                                        Content="Add Session" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label VerticalAlignment="Center" Content="Enter Profile ID or URL" />
+                                    <TextBox
+                                        x:Name="ProfileTextBox"
+                                        MinWidth="200"
+                                        MinHeight="50"
+                                        MaxHeight="100"
+                                        Margin="10,5"
+                                        VerticalContentAlignment="Center"
+                                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        TextWrapping="Wrap" />
+                                    <Button
+                                        x:Name="ProfileButton"
+                                        Margin="5,0,5,0"
+                                        Padding="5"
+                                        VerticalAlignment="Center"
+                                        Command="{Binding GetProfileDetails}"
+                                        CommandParameter="{Binding ElementName=ProfileTextBox}"
+                                        Content="Get Details" />
+                                </StackPanel>
                             </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <Label VerticalAlignment="Center" Content="Enter Profile ID or URL" />
-                                <TextBox
-                                    x:Name="ProfileTextBox"
-                                    MinWidth="200"
-                                    MinHeight="50"
-                                    MaxHeight="100"
-                                    Margin="10,5"
-                                    VerticalContentAlignment="Center"
-                                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                    TextWrapping="Wrap" />
-                                <Button
-                                    x:Name="ProfileButton"
-                                    Margin="5,0,5,0"
-                                    Padding="5"
-                                    VerticalAlignment="Center"
-                                    Command="{Binding GetProfileDetails}"
-                                    CommandParameter="{Binding ElementName=ProfileTextBox}"
-                                    Content="Get Details" />
-                            </StackPanel>
-                        </StackPanel>
-                        <ScrollViewer
-                            Grid.Row="1"
-                            Margin="5,3"
-                            HorizontalScrollBarVisibility="Auto"
-                            VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer
+                                Grid.Row="1"
+                                Margin="5,3"
+                                HorizontalScrollBarVisibility="Auto"
+                                VerticalScrollBarVisibility="Auto">
+                                <ListView
+                                    x:Name="SessionListView"
+                                    MinHeight="200"
+                                    ItemsSource="{Binding Sessions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    SelectedItem="{Binding Session, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                    <ListView.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Command="{Binding CopySession}" Header="Copy Session" />
+                                            <MenuItem Command="{Binding DeleteSession}" Header="Delete Session" />
+                                        </ContextMenu>
+                                    </ListView.ContextMenu>
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridView.Columns>
+                                                <GridViewColumn DisplayMemberBinding="{Binding Index, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header=" S.NO " />
+                                                <GridViewColumn
+                                                    Width="Auto"
+                                                    DisplayMemberBinding="{Binding CookieString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    Header=" Session " />
+                                            </GridView.Columns>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+                            </ScrollViewer>
+                        </Grid>
+                    </Expander>
+                    <Expander
+                        Grid.Row="1"
+                        Margin="5,10"
+                        Header="Instagram Feed"
+                        IsExpanded="True">
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                             <ListView
-                                x:Name="SessionListView"
+                                x:Name="FeedListView"
                                 MinHeight="200"
-                                ItemsSource="{Binding Sessions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                SelectedItem="{Binding Session, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                <ListView.ContextMenu>
-                                    <ContextMenu>
-                                        <MenuItem Command="{Binding CopySession}" Header="Copy Session" />
-                                        <MenuItem Command="{Binding DeleteSession}" Header="Delete Session" />
-                                    </ContextMenu>
-                                </ListView.ContextMenu>
+                                Margin="5,10">
                                 <ListView.View>
                                     <GridView>
                                         <GridView.Columns>
                                             <GridViewColumn DisplayMemberBinding="{Binding Index, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header=" S.NO " />
-                                            <GridViewColumn
-                                                Width="Auto"
-                                                DisplayMemberBinding="{Binding CookieString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                Header=" Session " />
                                         </GridView.Columns>
                                     </GridView>
                                 </ListView.View>
                             </ListView>
                         </ScrollViewer>
-                    </Grid>
-                </Expander>
-                <Expander
-                    Grid.Row="1"
-                    Margin="5,10"
-                    Header="Instagram Feed"
-                    IsExpanded="True">
-                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                        <ListView
-                            x:Name="FeedListView"
-                            MinHeight="200"
-                            Margin="5,10">
-                            <ListView.View>
-                                <GridView>
-                                    <GridView.Columns>
-                                        <GridViewColumn DisplayMemberBinding="{Binding Index, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header=" S.NO " />
-                                    </GridView.Columns>
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
-                    </ScrollViewer>
-                </Expander>
-            </Grid>
-        </ScrollViewer>
-        <DockPanel Grid.Row="2" Margin="10">
-            <TextBlock Text="&#169; All Rights Reserved 2025" />
-            <StackPanel HorizontalAlignment="Right" Orientation="Vertical">
-                <TextBlock Text="Powered By:" />
-                <TextBlock Text="@B International Games (AU)" />
-            </StackPanel>
-        </DockPanel>
+                    </Expander>
+                </Grid>
+            </ScrollViewer>
+            <DockPanel Grid.Row="2" Margin="10">
+                <TextBlock
+                    FontWeight="DemiBold"
+                    Foreground="White"
+                    Text="&#169; All Rights Reserved 2025" />
+                <StackPanel HorizontalAlignment="Right" Orientation="Vertical">
+                    <TextBlock
+                        FontWeight="DemiBold"
+                        Foreground="White"
+                        Text="Powered By:" />
+                    <TextBlock
+                        FontWeight="DemiBold"
+                        Foreground="White"
+                        Text="@B International Games (AU)" />
+                </StackPanel>
+            </DockPanel>
+        </Grid>
     </Grid>
-
 </Window>

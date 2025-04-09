@@ -19,6 +19,7 @@
         public int Index { get; set; }
         public List<cookies> cookies { get; set; }
         public string CookieString { get; set; }
+        public string Status { get; set; }
     }
     public class FeedModel
     {
