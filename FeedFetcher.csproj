@@ -11,7 +11,11 @@
 
   <ItemGroup>
     <None Remove="AIBot.png" />
+    <None Remove="comment.png" />
     <None Remove="IG.ico" />
+    <None Remove="Like.png" />
+    <None Remove="NVidia.jpg" />
+    <None Remove="share.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,6 +32,18 @@
 
   <ItemGroup>
     <Resource Include="AIBot.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="comment.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Like.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="NVidia.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="share.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

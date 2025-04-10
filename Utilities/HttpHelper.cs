@@ -1,4 +1,6 @@
-﻿using FeedFetcher.Response;
+﻿using FeedFetcher.API;
+using FeedFetcher.Models;
+using FeedFetcher.Response;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
@@ -13,6 +15,7 @@ namespace FeedFetcher.Utilities
     public class HttpHelper
     {
         private static HttpHelper instance;
+        private InstaAPI api { get; set; }
         public static HttpHelper Instance => instance ?? (instance = new HttpHelper());
         private InstagramUser InstagramUser { get; set; }= new InstagramUser();
         private static JsonJArrayHandler handler => JsonJArrayHandler.GetInstance;
@@ -20,6 +23,7 @@ namespace FeedFetcher.Utilities
         public void SetSession(string session)
         {
             this.SessionString = session;
+            InstagramUser.JsonCookies = session;
         }
         public SessionRequestParam WEBLogin(string profileUrl="")
         {
@@ -458,6 +462,7 @@ namespace FeedFetcher.Utilities
     {
         public bool SwaggerAPIInitialized { get; set; }
         public bool WebInitialized { get; set; }
+        public string JsonCookies { get; set; }
         public bool MobileInitialized { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }

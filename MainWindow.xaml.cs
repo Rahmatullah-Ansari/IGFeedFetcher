@@ -15,11 +15,13 @@ namespace FeedFetcher
     public partial class MainWindow : Window
     {
         public static MainWindow wd { get; set; }
+        private MainViewModel Instance;
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
         public MainWindow()
         {
             InitializeComponent();
-            MainGrid.DataContext = MainViewModel.Instance;
+            Instance = MainViewModel.Instance;
+            MainGrid.DataContext = Instance;
             wd = this;
             if (!CV(string.Empty))
             {
@@ -57,6 +59,7 @@ namespace FeedFetcher
                 {
                     if (!CV(string.Empty))
                     {
+                        Instance.tokenSource.Cancel();
                         tokenSource.Cancel();
                         Application.Current.Dispatcher.Invoke(() =>
                         {

@@ -12,6 +12,19 @@ namespace FeedFetcher.ViewModel
         private static MainViewModel instance;
         public static MainViewModel Instance => instance ?? (instance = new MainViewModel());
         private static readonly JsonJArrayHandler handler = JsonJArrayHandler.GetInstance;
+        private ObservableCollection<FeedModels> _feeds=new ObservableCollection<FeedModels>();
+        public CancellationTokenSource tokenSource = new CancellationTokenSource();
+        private string _text = "Start";
+        public string ButtonText
+        {
+            get => _text;
+            set=>SetProperty(ref _text, value,nameof(ButtonText));
+        }
+        public ObservableCollection<FeedModels> FeedCollections
+        {
+            get { return _feeds; }
+            set=>SetProperty(ref _feeds, value,nameof(FeedCollections));
+        }
         private ObservableCollection<SessionModel> _sessions = new ObservableCollection<SessionModel>();
         private SessionModel _session = new SessionModel();
         public SessionModel Session
@@ -24,6 +37,18 @@ namespace FeedFetcher.ViewModel
         {
             get => _cookies;
             set => SetProperty(ref _cookies, value, nameof(CookiesString));
+        }
+        private string _username;
+        public string Username
+        {
+            get => _username;
+            set => SetProperty(ref _username, value, nameof(Username));
+        }
+        private string _pass;
+        public string Password
+        {
+            get => _pass;
+            set => SetProperty(ref _pass, value, nameof(Password));
         }
         private string _api=FileUtility.GetAPI();
         public string API
@@ -42,6 +67,7 @@ namespace FeedFetcher.ViewModel
         public ICommand DeleteSession { get; set; }
         public ICommand CopySession { get; set; }
         public ICommand SaveProfileAPI { get; set; }
+        public ICommand StartFetching { get; set; }
         #endregion
 
         #region Constructor
@@ -50,6 +76,7 @@ namespace FeedFetcher.ViewModel
         {
             AddSession = new BaseCommand<object>(AddSessionExecute);
             SaveProfileAPI = new BaseCommand<object>(SaveProfileAPIExecute);
+            StartFetching = new BaseCommand<object>(StartFetchExecute);
             DeleteSession = new BaseCommand<object>(DeleteSessionExecute);
             CopySession = new BaseCommand<object>(CopySessionSessionExecute);
             Sessions = [.. FileUtility.GetSavedSession()];
@@ -94,6 +121,22 @@ namespace FeedFetcher.ViewModel
         {
             try
             {
+                if(Sessions.Count == 0)
+                {
+                    MessageBox.Show("Please add atleast one instagram account or session");
+                    return;
+                }
+                if(ButtonText == "Stop")
+                {
+                    tokenSource.Cancel();
+                    ButtonText = "Start";
+                    return;
+                }
+                else
+                {
+
+                    ButtonText = "Stop";
+                }
                 var profile = obj as TextBox;
                 if (!string.IsNullOrEmpty(profile.Text))
                 {
@@ -101,7 +144,6 @@ namespace FeedFetcher.ViewModel
                     profile.Text = string.Empty;
                     httpHelper.SetSession(Sessions.GetRandomItem()?.CookieString);
                     var profileUrl = GetProfileUrl(profileData);
-                    var feedResponse1 = httpHelper.GetFeedResponse(profileUrl);
                     var loginResponse = httpHelper.MOBILELogin();
                     if (loginResponse.IsMobileLoggedIn)
                     {
