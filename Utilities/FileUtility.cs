@@ -35,6 +35,26 @@ namespace FeedFetcher.Utilities
                 return IGConstants.UserIdAPI;
             }
         }
+        public static PaginationModel GetPaginationData()
+        {
+            try
+            {
+                return handler.Deserialize<PaginationModel>(File.ReadAllText(IGConstants.PaginationFile));
+            }
+            catch
+            {
+                return new PaginationModel();
+            }
+        }
+        public static bool SavePagination(PaginationModel model)
+        {
+            try
+            {
+                File.WriteAllText(IGConstants.PaginationFile, handler.Serialize(model));
+                return true;
+            }
+            catch { return false; }
+        }
         public static IEnumerable<SessionModel> GetSavedSession()
         {
             try

@@ -5,6 +5,7 @@ namespace FeedFetcher.Utilities
     public static class IGConstants
     {
         public static string SessionFileName => GetHomeDirectory().CombinePath("Session.txt");
+        public static string PaginationFile => GetHomeDirectory().CombinePath("Pagination.json");
         public static string ApplicationName => Properties.Resources.NM;
         public static string UserIdAPI => "https://app.autolikesig.com/api/instausername";
         public static string PostAPI { get; set; } = "https://api.gaia.proceedinteractive.com/igServices/ig/user/instagram_profile_data_update";

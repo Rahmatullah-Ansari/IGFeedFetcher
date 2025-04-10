@@ -1,4 +1,5 @@
 ﻿using FeedFetcher.Models;
+using FeedFetcher.Response;
 using FeedFetcher.Utilities;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -14,6 +15,7 @@ namespace FeedFetcher.ViewModel
         private static readonly JsonJArrayHandler handler = JsonJArrayHandler.GetInstance;
         private ObservableCollection<FeedModels> _feeds=new ObservableCollection<FeedModels>();
         public CancellationTokenSource tokenSource = new CancellationTokenSource();
+        private PaginationModel pagination = new PaginationModel();
         private string _text = "Start";
         public string ButtonText
         {
@@ -79,8 +81,17 @@ namespace FeedFetcher.ViewModel
             StartFetching = new BaseCommand<object>(StartFetchExecute);
             DeleteSession = new BaseCommand<object>(DeleteSessionExecute);
             CopySession = new BaseCommand<object>(CopySessionSessionExecute);
-            Sessions = [.. FileUtility.GetSavedSession()];
+            InitStarter();
+        }
 
+        private void InitStarter()
+        {
+            try
+            {
+                Sessions = [.. FileUtility.GetSavedSession()];
+                pagination = FileUtility.GetPaginationData();
+            }
+            catch { }
         }
 
         private void CopySessionSessionExecute(object obj)
@@ -113,11 +124,17 @@ namespace FeedFetcher.ViewModel
             try
             {
                 if (!string.IsNullOrEmpty(API))
+                {
                     FileUtility.SaveAPI(API);
+                    pagination = new PaginationModel();
+                    pagination.NextPageUrl = API;
+                    FileUtility.SavePagination(pagination);
+                }
+                    
             }
             catch { }
         }
-        private void StartFetchExecute(object obj)
+        private async void StartFetchExecute(object obj)
         {
             try
             {
@@ -126,7 +143,12 @@ namespace FeedFetcher.ViewModel
                     MessageBox.Show("Please add atleast one instagram account or session");
                     return;
                 }
-                if(ButtonText == "Stop")
+                if (string.IsNullOrEmpty(API))
+                {
+                    MessageBox.Show("Please provide server api");
+                    return;
+                }
+                if (ButtonText == "Stop")
                 {
                     tokenSource.Cancel();
                     ButtonText = "Start";
@@ -137,33 +159,52 @@ namespace FeedFetcher.ViewModel
 
                     ButtonText = "Stop";
                 }
-                var profile = obj as TextBox;
-                if (!string.IsNullOrEmpty(profile.Text))
+                while (pagination.HasMoreResults)
                 {
-                    var profileData = profile.Text;
-                    profile.Text = string.Empty;
-                    httpHelper.SetSession(Sessions.GetRandomItem()?.CookieString);
-                    var profileUrl = GetProfileUrl(profileData);
-                    var loginResponse = httpHelper.MOBILELogin();
-                    if (loginResponse.IsMobileLoggedIn)
+                    try
                     {
-                        var feedResponse = httpHelper.GetFeedResponse(profileUrl);
+                        tokenSource.Token.ThrowIfCancellationRequested();
+                        var UsernamesCollections = await GetUsersProfileID();
+                        if(UsernamesCollections!= null && UsernamesCollections.Any())
+                        {
+                            foreach(var id in UsernamesCollections)
+                            {
+                                tokenSource.Token.ThrowIfCancellationRequested();
+                                ThreadFactory.Instance.Start(async () =>
+                                {
+                                    var instance = Processor.Processor.Instance;
+                                    instance.Init(Sessions.GetRandomItem());
+                                    await instance.Start(id,tokenSource.Token);
+                                });
+                                tokenSource.Token.ThrowIfCancellationRequested();
+                                break;
+                            }
+                            break;
+                        }
+                        await Task.Delay(TimeSpan.FromSeconds(20),tokenSource.Token);
+                        tokenSource.Token.ThrowIfCancellationRequested();
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                    catch { }
+                    finally
+                    {
+                        FileUtility.SavePagination(pagination);
                     }
                 }
             }
             catch { }
         }
-        private string GetProfileUrl(string text)
-        {
-            try
-            {
-                if (!string.IsNullOrEmpty(text) && !text.Contains(".instagram.com"))
-                    return $"https://www.instagram.com/{text}/";
-                return text;
-            }
-            catch { return text; }
-        }
 
+        private async Task<List<string>> GetUsersProfileID()
+        {
+            var response = await httpHelper.GetRequestAsync(pagination.NextPageUrl);
+            var finalResponse = new ProfileIDResponseHandler(response);
+            pagination = finalResponse.model;
+            return finalResponse.ListIDS;
+        }
         private void AddSessionExecute(object obj)
         {
             try

@@ -6,7 +6,7 @@ namespace FeedFetcher.Utilities
     public class JsonJArrayHandler
     {
         public T Deserialize<T>(string obj) => JsonConvert.DeserializeObject<T>(obj);
-        public string Serialize<T>(T obj)=>JsonConvert.SerializeObject(obj);
+        public string Serialize<T>(T obj) => JsonConvert.SerializeObject(obj);
         private static volatile JsonJArrayHandler Instance;
         private static readonly object _lock = new object();
         public static JsonJArrayHandler GetInstance
@@ -140,5 +140,10 @@ namespace FeedFetcher.Utilities
 
             return new JArray();
         }
+    }
+    public static class JsonUtils
+    {
+        public static T Deserialize<T>(this string obj) => JsonConvert.DeserializeObject<T>(obj);
+        public static string Serialize<T>(this T obj) => JsonConvert.SerializeObject(obj);
     }
 }

@@ -1,12 +1,16 @@
 ﻿using FeedFetcher.API;
 using FeedFetcher.Models;
 using FeedFetcher.Response;
+using InstagramApiSharp;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web;
 using ZstdNet;
 
@@ -20,10 +24,13 @@ namespace FeedFetcher.Utilities
         private InstagramUser InstagramUser { get; set; }= new InstagramUser();
         private static JsonJArrayHandler handler => JsonJArrayHandler.GetInstance;
         public string SessionString { get; set; }
-        public void SetSession(string session)
+        public void SetSession(SessionModel session)
         {
-            this.SessionString = session;
-            InstagramUser.JsonCookies = session;
+            this.SessionString = session.CookieString;
+            InstagramUser.JsonCookies = session.CookieString;
+            InstagramUser.Username = session.Username;
+            InstagramUser.Password = session.Password;
+            api = InstaAPI.Instance(new InstagramAccount { Cookies = session.CookieString, Username = InstagramUser.Username, Password = InstagramUser.Password });
         }
         public SessionRequestParam WEBLogin(string profileUrl="")
         {
@@ -363,87 +370,160 @@ namespace FeedFetcher.Utilities
             }
             return param;
         }
-
-        public FeedResponseHandler GetFeedResponse(string profileUrl)
+        //private string GetProfileUrl(string text)
+        //{
+        //    try
+        //    {
+        //        if (!string.IsNullOrEmpty(text) && !text.Contains(".instagram.com"))
+        //            return $"https://www.instagram.com/{text}/";
+        //        return text;
+        //    }
+        //    catch { return text; }
+        //}
+        public async Task<FeedResponseHandler> GetFeedResponse(string profileUrl,bool IsMobile=false)
         {
             var response = new FeedResponseHandler();
             try
             {
-                var reqParam = WEBLogin(profileUrl);
-                var url = $"https://i.instagram.com/api/v1/feed/user_stream/{reqParam.OtherProfileID}/";
-                var deviceID = GetGuid();
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-                request.Method = "POST";
-                request.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
-                // Add headers
-                request.Headers.Add("User-Agent", "Instagram 283.0.0.20.105 Android (31/12; 320dpi; 720x1470; vivo; V2029; 2027; qcom; en_US; 475221264)");
-                request.Headers.Add("X-IG-App-Locale", "en_US");
-                request.Headers.Add("X-IG-Device-Locale", "en_US");
-                request.Headers.Add("X-IG-Mapped-Locale", "en_US");
-                request.Headers.Add("X-Pigeon-Session-Id", $"UFS-{GetGuid()}-0");
-                request.Headers.Add("X-Pigeon-Rawclienttime", GetRowClientTime());
-                //request.Headers.Add("X-IG-Bandwidth-Speed-KBPS", "787.000");
-                //request.Headers.Add("X-IG-Bandwidth-TotalBytes-B", "4522550");
-                //request.Headers.Add("X-IG-Bandwidth-TotalTime-MS", "6464");
-                request.Headers.Add("X-Bloks-Version-Id", "f5fbf62cc3c51dc0e6f4ffd3a79e0c5929ae0b8af58c54acd1e186871a92fb27");
-                if(!string.IsNullOrEmpty(reqParam.Hmac))
-                    request.Headers.Add("X-IG-WWW-Claim", reqParam.Hmac);
-                request.Headers.Add("X-IG-Transfer-Encoding", "chunked");
-                request.Headers.Add("X-Bloks-Is-Layout-RTL", "false");
-                request.Headers.Add("X-IG-Device-ID", deviceID);
-                request.Headers.Add("X-IG-Family-Device-ID", GetGuid());
-                request.Headers.Add("X-IG-Android-ID", GetMobileDeviceId());
-                request.Headers.Add("X-IG-Timezone-Offset", "19800");
-                //request.Headers.Add("X-IG-Nav-Chain", "MainFeedFragment:feed_timeline:1:cold_start:1737709686.720:10#230#301:3552032383224948675,UserDetailFragment:profile:3:media_owner:1737709705.641::,ClipsProfileTabFragment:clips_profile:4:button:1737709707.208::,ProfileMediaTabFragment:profile:5:button:1737709712.452::");
-                request.Headers.Add("X-IG-CLIENT-ENDPOINT", "ProfileMediaTabFragment:profile");
-                //request.Headers.Add("X-IG-SALT-LOGGER-IDS", "566762171,974456048,31784979,25624577,25101347,42991645,25952257,42991646,61669378,974462634");
-                request.Headers.Add("X-FB-Connection-Type", "WIFI");
-                request.Headers.Add("X-IG-Connection-Type", "WIFI");
-                request.Headers.Add("X-IG-Capabilities", "3brTv10=");
-                request.Headers.Add("X-IG-App-ID", "567067343352427");
-                request.Headers.Add("Authorization", reqParam.AuthToken);
-                request.Headers.Add("X-MID", reqParam.MID);
-                //request.Headers.Add("IG-U-IG-DIRECT-REGION-HINT", "CLN,68839847230,1768988104:01f7d4e2c91e88bec95468fa64733a74668ac168f62b3d1377a9f8e0f94bcc986097a2b2");
-                request.Headers.Add("IG-U-DS-USER-ID",reqParam.UserID);
-                request.Headers.Add("IG-U-RUR", reqParam.RUR);
-                request.Headers.Add("IG-INTENDED-USER-ID", reqParam.UserID);
-
-                // Prepare the request body
-                string postData = $"_uuid={deviceID}";
-                byte[] byteArray = Encoding.UTF8.GetBytes(postData);
-
-                // Write the request body
-                using (Stream dataStream = request.GetRequestStream())
+                if (!IsMobile)
                 {
-                    dataStream.Write(byteArray, 0, byteArray.Length);
+                    var url = $"https://www.instagram.com/api/v1/users/web_profile_info/?username={WebUtility.UrlEncode(profileUrl)}";
+
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                    request.Method = "GET";
+                    request.Headers["Accept-Encoding"] = "gzip, deflate, br, zstd";
+                    request.Headers["Accept-Language"] = "en-GB,en;q=0.9";
+                    request.Referer = $"https://www.instagram.com/{profileUrl}/";
+                    request.Headers["sec-ch-ua"] = "\"Google Chrome\";v=\"135\", \"Not-A.Brand\";v=\"8\", \"Chromium\";v=\"135\"";
+                    request.Headers["sec-ch-ua-full-version-list"] = "\"Google Chrome\";v=\"135.0.7049.84\", \"Not-A.Brand\";v=\"8.0.0.0\", \"Chromium\";v=\"135.0.7049.84\"";
+                    request.Headers["sec-ch-ua-mobile"] = "?0";
+                    request.Headers["sec-ch-ua-platform"] = "\"Windows\"";
+                    request.Headers["sec-fetch-dest"] = "empty";
+                    request.Headers["sec-fetch-mode"] = "cors";
+                    request.Headers["sec-fetch-site"] = "same-origin";
+                    request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36";
+                    request.Headers["x-ig-app-id"] = "936619743392459";
+                    var res = await request.GetResponseAsync() as HttpWebResponse;
+                    return new FeedResponseHandler(GetDecodedResponse(res.GetResponseStream(),res?.ContentEncoding));
+                    #region Mobile Login
+                    //profileUrl = GetProfileUrl(profileUrl);
+                    //var reqParam = WEBLogin(profileUrl);
+                    //var url = $"https://i.instagram.com/api/v1/feed/user_stream/{reqParam.OtherProfileID}/";
+                    //var deviceID = GetGuid();
+                    //HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                    //request.Method = "POST";
+                    //request.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
+                    //// Add headers
+                    //request.Headers.Add("User-Agent", "Instagram 283.0.0.20.105 Android (31/12; 320dpi; 720x1470; vivo; V2029; 2027; qcom; en_US; 475221264)");
+                    //request.Headers.Add("X-IG-App-Locale", "en_US");
+                    //request.Headers.Add("X-IG-Device-Locale", "en_US");
+                    //request.Headers.Add("X-IG-Mapped-Locale", "en_US");
+                    //request.Headers.Add("X-Pigeon-Session-Id", $"UFS-{GetGuid()}-0");
+                    //request.Headers.Add("X-Pigeon-Rawclienttime", GetRowClientTime());
+                    ////request.Headers.Add("X-IG-Bandwidth-Speed-KBPS", "787.000");
+                    ////request.Headers.Add("X-IG-Bandwidth-TotalBytes-B", "4522550");
+                    ////request.Headers.Add("X-IG-Bandwidth-TotalTime-MS", "6464");
+                    //request.Headers.Add("X-Bloks-Version-Id", "f5fbf62cc3c51dc0e6f4ffd3a79e0c5929ae0b8af58c54acd1e186871a92fb27");
+                    //if (!string.IsNullOrEmpty(reqParam.Hmac))
+                    //    request.Headers.Add("X-IG-WWW-Claim", reqParam.Hmac);
+                    //request.Headers.Add("X-IG-Transfer-Encoding", "chunked");
+                    //request.Headers.Add("X-Bloks-Is-Layout-RTL", "false");
+                    //request.Headers.Add("X-IG-Device-ID", deviceID);
+                    //request.Headers.Add("X-IG-Family-Device-ID", GetGuid());
+                    //request.Headers.Add("X-IG-Android-ID", GetMobileDeviceId());
+                    //request.Headers.Add("X-IG-Timezone-Offset", "19800");
+                    ////request.Headers.Add("X-IG-Nav-Chain", "MainFeedFragment:feed_timeline:1:cold_start:1737709686.720:10#230#301:3552032383224948675,UserDetailFragment:profile:3:media_owner:1737709705.641::,ClipsProfileTabFragment:clips_profile:4:button:1737709707.208::,ProfileMediaTabFragment:profile:5:button:1737709712.452::");
+                    //request.Headers.Add("X-IG-CLIENT-ENDPOINT", "ProfileMediaTabFragment:profile");
+                    ////request.Headers.Add("X-IG-SALT-LOGGER-IDS", "566762171,974456048,31784979,25624577,25101347,42991645,25952257,42991646,61669378,974462634");
+                    //request.Headers.Add("X-FB-Connection-Type", "WIFI");
+                    //request.Headers.Add("X-IG-Connection-Type", "WIFI");
+                    //request.Headers.Add("X-IG-Capabilities", "3brTv10=");
+                    //request.Headers.Add("X-IG-App-ID", "567067343352427");
+                    //request.Headers.Add("Authorization", reqParam.AuthToken);
+                    //request.Headers.Add("X-MID", reqParam.MID);
+                    ////request.Headers.Add("IG-U-IG-DIRECT-REGION-HINT", "CLN,68839847230,1768988104:01f7d4e2c91e88bec95468fa64733a74668ac168f62b3d1377a9f8e0f94bcc986097a2b2");
+                    //request.Headers.Add("IG-U-DS-USER-ID", reqParam.UserID);
+                    //request.Headers.Add("IG-U-RUR", reqParam.RUR);
+                    //request.Headers.Add("IG-INTENDED-USER-ID", reqParam.UserID);
+
+                    //// Prepare the request body
+                    //string postData = $"_uuid={deviceID}";
+                    //byte[] byteArray = Encoding.UTF8.GetBytes(postData);
+
+                    //// Write the request body
+                    //using (Stream dataStream = request.GetRequestStream())
+                    //{
+                    //    dataStream.Write(byteArray, 0, byteArray.Length);
+                    //}
+
+                    //try
+                    //{
+                    //    // Get the response from the server
+                    //    HttpWebResponse response1 = (HttpWebResponse)request.GetResponse();
+
+                    //    // Read the response
+                    //    using (StreamReader reader = new StreamReader(response1.GetResponseStream()))
+                    //    {
+                    //        string responseText = reader.ReadToEnd();
+                    //        Console.WriteLine("Response Code: " + response1.StatusCode);
+                    //        Console.WriteLine("Response Body: " + responseText);
+                    //    }
+                    //}
+                    //catch (WebException ex)
+                    //{
+                    //    using (StreamReader reader = new StreamReader(ex.Response.GetResponseStream()))
+                    //    {
+                    //        string errorResponse = reader.ReadToEnd();
+                    //        Console.WriteLine("Error: " + ex.Message);
+                    //        Console.WriteLine("Error Response: " + errorResponse);
+                    //    }
+                    //}
+
+                    #endregion
                 }
-
-                try
+                else
                 {
-                    // Get the response from the server
-                    HttpWebResponse response1 = (HttpWebResponse)request.GetResponse();
-
-                    // Read the response
-                    using (StreamReader reader = new StreamReader(response1.GetResponseStream()))
+                    api = await api.Build();
+                    if (api.instaApi.IsUserAuthenticated)
                     {
-                        string responseText = reader.ReadToEnd();
-                        Console.WriteLine("Response Code: " + response1.StatusCode);
-                        Console.WriteLine("Response Body: " + responseText);
-                    }
-                }
-                catch (WebException ex)
-                {
-                    using (StreamReader reader = new StreamReader(ex.Response.GetResponseStream()))
-                    {
-                        string errorResponse = reader.ReadToEnd();
-                        Console.WriteLine("Error: " + ex.Message);
-                        Console.WriteLine("Error Response: " + errorResponse);
+                        var feedresponse = await api.instaApi.FeedProcessor.GetUserTimelineFeedAsync(paginationParameters:
+                            PaginationParameters.MaxPagesToLoad(2));
+                        return new FeedResponseHandler(feedresponse.Value.Serialize(), true);
                     }
                 }
 
             }
             catch { }
             return response;
+        }
+
+        public async Task<string> GetRequestAsync(string url)
+        {
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                request.Method = "GET";
+                var response = await request.GetResponseAsync();
+                return new StreamReader(response.GetResponseStream()).ReadToEnd();
+            }
+            catch { return string.Empty; }
+        }
+
+        public async Task<string> PostAsync(string postAPI, string? jsonResponse)
+        {
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(postAPI);
+                request.Method = "POST";
+                request.ContentType = "application/json";
+                var buffer = Encoding.UTF8.GetBytes(jsonResponse);
+                request.ContentLength = buffer.Length;
+                var requestStream = await request.GetRequestStreamAsync();
+                requestStream.Write(buffer, 0, buffer.Length);
+                var response =await request.GetResponseAsync();
+                return new StreamReader(response.GetResponseStream()).ReadToEnd();
+            }
+            catch { return string.Empty; }
         }
     }
     public class SessionRequestParam
