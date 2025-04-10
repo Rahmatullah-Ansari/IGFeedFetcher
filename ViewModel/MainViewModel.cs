@@ -19,6 +19,18 @@ namespace FeedFetcher.ViewModel
             get { return _session; }
             set => SetProperty(ref _session, value,nameof(Session));
         }
+        private string _cookies;
+        public string CookiesString
+        {
+            get => _cookies;
+            set => SetProperty(ref _cookies, value, nameof(CookiesString));
+        }
+        private string _api=FileUtility.GetAPI();
+        public string API
+        {
+            get => _api;
+            set => SetProperty(ref _api, value, nameof(API));
+        }
         public ObservableCollection<SessionModel> Sessions
         {
             get => _sessions;
@@ -29,7 +41,7 @@ namespace FeedFetcher.ViewModel
         public ICommand AddSession { get; set; }
         public ICommand DeleteSession { get; set; }
         public ICommand CopySession { get; set; }
-        public ICommand GetProfileDetails { get; set; }
+        public ICommand SaveProfileAPI { get; set; }
         #endregion
 
         #region Constructor
@@ -37,10 +49,10 @@ namespace FeedFetcher.ViewModel
         public MainViewModel()
         {
             AddSession = new BaseCommand<object>(AddSessionExecute);
-            GetProfileDetails = new BaseCommand<object>(GetProfileDetailsExecute);
+            SaveProfileAPI = new BaseCommand<object>(SaveProfileAPIExecute);
             DeleteSession = new BaseCommand<object>(DeleteSessionExecute);
             CopySession = new BaseCommand<object>(CopySessionSessionExecute);
-            Sessions = new ObservableCollection<SessionModel>(FileUtility.GetSavedSession());
+            Sessions = [.. FileUtility.GetSavedSession()];
 
         }
 
@@ -69,7 +81,16 @@ namespace FeedFetcher.ViewModel
             catch { }
         }
 
-        private void GetProfileDetailsExecute(object obj)
+        private void SaveProfileAPIExecute(object obj)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(API))
+                    FileUtility.SaveAPI(API);
+            }
+            catch { }
+        }
+        private void StartFetchExecute(object obj)
         {
             try
             {
@@ -90,7 +111,6 @@ namespace FeedFetcher.ViewModel
             }
             catch { }
         }
-
         private string GetProfileUrl(string text)
         {
             try

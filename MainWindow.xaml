@@ -93,7 +93,10 @@
                 FontWeight="DemiBold"
                 Foreground="White"
                 Text="License Valid Upto : -" />
-            <ScrollViewer Grid.Row="1">
+            <ScrollViewer
+                Grid.Row="1"
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Auto">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -102,66 +105,131 @@
                     <Expander
                         Grid.Row="0"
                         Margin="10"
+                        FontSize="16"
+                        Foreground="White"
                         Header="Input"
                         IsExpanded="True">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
                             <StackPanel Grid.Row="0" Orientation="Vertical">
                                 <StackPanel Orientation="Horizontal">
-                                    <Label VerticalAlignment="Center" Content="Enter Session" />
-                                    <TextBox
-                                        x:Name="SessionTextBox"
+                                    <Label
+                                        VerticalAlignment="Center"
+                                        Content="Enter Session"
+                                        Foreground="White" />
+                                    <Border
                                         MinWidth="200"
-                                        MinHeight="50"
+                                        MinHeight="40"
                                         MaxWidth="300"
                                         MaxHeight="100"
                                         Margin="10,5"
-                                        VerticalContentAlignment="Center"
-                                        ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                                        ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                        TextWrapping="Wrap" />
-                                    <Button
-                                        x:Name="SessionButton"
-                                        Margin="5,0,5,0"
-                                        Padding="5"
                                         VerticalAlignment="Center"
-                                        Command="{Binding AddSession}"
-                                        CommandParameter="{Binding ElementName=SessionTextBox}"
-                                        Content="Add Session" />
+                                        CornerRadius="5">
+                                        <TextBox
+                                            x:Name="SessionTextBox"
+                                            Margin="2"
+                                            VerticalContentAlignment="Center"
+                                            BorderThickness="0"
+                                            ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                            ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                            Text="{Binding CookiesString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            TextWrapping="Wrap" />
+                                    </Border>
+                                    <Border
+                                        Margin="5,0,5,0"
+                                        VerticalAlignment="Center"
+                                        BorderBrush="White"
+                                        BorderThickness="2"
+                                        CornerRadius="5"
+                                        Cursor="Hand">
+                                        <Button
+                                            x:Name="SessionButton"
+                                            Margin="3"
+                                            Padding="20,2"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Command="{Binding AddSession}"
+                                            CommandParameter="{Binding ElementName=SessionTextBox}"
+                                            Content="Save"
+                                            Foreground="White" />
+                                    </Border>
+                                    <StackPanel Margin="20,10" Orientation="Vertical">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Label Content="Enter Username" Foreground="White" />
+                                            <Border
+                                                MinWidth="200"
+                                                BorderBrush="White"
+                                                BorderThickness="2"
+                                                CornerRadius="5">
+                                                <TextBox
+                                                    Margin="2"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Foreground="White" />
+                                            </Border>
+                                        </StackPanel>
+                                        <StackPanel Margin="0,10" Orientation="Horizontal">
+                                            <Label Content="Enter Password" Foreground="White" />
+                                            <Border
+                                                MinWidth="200"
+                                                BorderBrush="White"
+                                                BorderThickness="2"
+                                                CornerRadius="5">
+                                                <TextBox
+                                                    Margin="2"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Foreground="White" />
+                                            </Border>
+                                        </StackPanel>
+                                    </StackPanel>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
-                                    <Label VerticalAlignment="Center" Content="Enter Profile ID or URL" />
+                                    <Label
+                                        VerticalAlignment="Center"
+                                        Content="Provide Server API"
+                                        Foreground="White" />
                                     <TextBox
                                         x:Name="ProfileTextBox"
                                         MinWidth="200"
-                                        MinHeight="50"
+                                        MinHeight="30"
                                         MaxHeight="100"
                                         Margin="10,5"
                                         VerticalContentAlignment="Center"
                                         ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                        Text="{Binding API, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                         TextWrapping="Wrap" />
-                                    <Button
-                                        x:Name="ProfileButton"
+                                    <Border
+                                        MinWidth="100"
                                         Margin="5,0,5,0"
-                                        Padding="5"
                                         VerticalAlignment="Center"
-                                        Command="{Binding GetProfileDetails}"
-                                        CommandParameter="{Binding ElementName=ProfileTextBox}"
-                                        Content="Get Details" />
+                                        BorderBrush="White"
+                                        BorderThickness="2"
+                                        CornerRadius="5"
+                                        Cursor="Hand">
+                                        <Button
+                                            x:Name="ProfileButton"
+                                            Margin="5"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Command="{Binding SaveProfileAPI}"
+                                            Content="Save"
+                                            Foreground="White" />
+                                    </Border>
                                 </StackPanel>
                             </StackPanel>
                             <ScrollViewer
                                 Grid.Row="1"
+                                MinHeight="200"
                                 Margin="5,3"
                                 HorizontalScrollBarVisibility="Auto"
                                 VerticalScrollBarVisibility="Auto">
                                 <ListView
                                     x:Name="SessionListView"
-                                    MinHeight="200"
                                     ItemsSource="{Binding Sessions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     SelectedItem="{Binding Session, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                     <ListView.ContextMenu>
@@ -174,10 +242,21 @@
                                         <GridView>
                                             <GridView.Columns>
                                                 <GridViewColumn DisplayMemberBinding="{Binding Index, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header=" S.NO " />
-                                                <GridViewColumn
-                                                    Width="Auto"
-                                                    DisplayMemberBinding="{Binding CookieString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                    Header=" Session " />
+                                                <GridViewColumn DisplayMemberBinding="{Binding Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header=" Username " />
+                                                <GridViewColumn Width="200" Header=" Session ">
+                                                    <GridViewColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <TextBox
+                                                                Width="500"
+                                                                Height="100"
+                                                                IsEnabled="False"
+                                                                ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                                                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                                Text="{Binding CookieString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                TextWrapping="WrapWithOverflow" />
+                                                        </DataTemplate>
+                                                    </GridViewColumn.CellTemplate>
+                                                </GridViewColumn>
                                             </GridView.Columns>
                                         </GridView>
                                     </ListView.View>
@@ -188,6 +267,8 @@
                     <Expander
                         Grid.Row="1"
                         Margin="5,10"
+                        FontSize="16"
+                        Foreground="White"
                         Header="Instagram Feed"
                         IsExpanded="True">
                         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">

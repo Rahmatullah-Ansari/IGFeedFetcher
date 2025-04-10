@@ -1,4 +1,6 @@
-﻿namespace FeedFetcher.Models
+﻿using FeedFetcher.Utilities;
+
+namespace FeedFetcher.Models
 {
     public class cookies
     {
@@ -14,11 +16,43 @@
         public string storeId {  get; set; }
         public string value {  get; set; }
     }
-    public class SessionModel
+    public class SessionModel:BindableBase
     {
-        public int Index { get; set; }
-        public List<cookies> cookies { get; set; }
-        public string CookieString { get; set; }
-        public string Status { get; set; }
+        private int index;
+        public int Index
+        {
+            get => index;
+            set=>SetProperty(ref index, value,nameof(Index));
+        }
+        private List<cookies> _cookies;
+        public List<cookies> cookies
+        {
+            get => _cookies;
+            set=>SetProperty(ref _cookies, value,nameof(cookies));
+        }
+        private string _cookieString;
+        public string CookieString
+        {
+            get => _cookieString;
+            set=>SetProperty(ref _cookieString, value,nameof(CookieString));
+        }
+        private string _status;
+        public string Status
+        {
+            get => _status;
+            set=>SetProperty(ref _status, value,nameof(Status));
+        }
+        private string _username="N/A";
+        public string Username
+        {
+            get=> _username;
+            set=>SetProperty(ref _username, value,nameof(Username));
+        }
+        private string _password;
+        public string Password
+        {
+            get => _password;
+            set=>SetProperty(ref _password, value,nameof(Password));
+        }
     }
 }

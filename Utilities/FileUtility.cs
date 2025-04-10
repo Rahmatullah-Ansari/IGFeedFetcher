@@ -15,7 +15,26 @@ namespace FeedFetcher.Utilities
             }
             catch { return false;}
         }
-
+        public static bool SaveAPI(string api)
+        {
+            try
+            {
+                File.WriteAllText(IGConstants.API, api);
+                return true;
+            }
+            catch { return false; }
+        }
+        public static string GetAPI()
+        {
+            try
+            {
+                return File.ReadAllText(IGConstants.API);
+            }
+            catch
+            {
+                return IGConstants.UserIdAPI;
+            }
+        }
         public static IEnumerable<SessionModel> GetSavedSession()
         {
             try
