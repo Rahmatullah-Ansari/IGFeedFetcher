@@ -520,7 +520,7 @@ namespace FeedFetcher.Utilities
                     api = await api.Build();
                     if (api.instaApi.IsUserAuthenticated)
                     {
-                        var feedresponse = await api.instaApi.FeedProcessor.GetUserTimelineFeedAsync(paginationParameters:
+                        var feedresponse = await api.instaApi.UserProcessor.GetUserMediaAsync(profileUrl, paginationParameters:
                             PaginationParameters.MaxPagesToLoad(2));
                         return new FeedResponseHandler(feedresponse.Value.Serialize(), true);
                     }
