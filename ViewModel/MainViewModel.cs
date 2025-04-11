@@ -83,7 +83,9 @@ namespace FeedFetcher.ViewModel
             CopySession = new BaseCommand<object>(CopySessionSessionExecute);
             InitStarter();
         }
+        #endregion
 
+        #region Methods
         private void InitStarter()
         {
             try

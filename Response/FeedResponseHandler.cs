@@ -21,6 +21,8 @@ namespace FeedFetcher.Response
                 }
                 JsonResponse = Response;
                 GetDetails(JsonResponse);
+                HasFeed = !string.IsNullOrEmpty(JsonResponse)
+                    && FeedsCollection.Count > 0;
             }
             catch { }
         }

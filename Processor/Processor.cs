@@ -1,4 +1,6 @@
-﻿using FeedFetcher.Models;
+﻿using FeedFetcher.Interfaces;
+using FeedFetcher.IOCAndServices;
+using FeedFetcher.Models;
 using FeedFetcher.Utilities;
 
 namespace FeedFetcher.Processor
@@ -7,6 +9,11 @@ namespace FeedFetcher.Processor
     {
         public static Processor Instance=>new Processor();
         private HttpHelper httpHelper = HttpHelper.Instance;
+        private ILogger logger { get; set; }
+        public Processor()
+        {
+            logger = InstanceProvider.GetInstance<ILogger>();
+        }
         private SessionModel session {  get; set; }
         public async Task Start(string Profileid,CancellationToken token)
         {
@@ -28,7 +35,7 @@ namespace FeedFetcher.Processor
 
         private async Task PostFeed(string? id, string? jsonResponse)
         {
-            await httpHelper.PostAsync(IGConstants.PostAPI, GetPostBody(id,jsonResponse));
+            var postedResponse =  await httpHelper.PostAsync(IGConstants.PostAPI, GetPostBody(id,jsonResponse));
         }
 
         private string? GetPostBody(string? id, string? FinalJsonResponse)
