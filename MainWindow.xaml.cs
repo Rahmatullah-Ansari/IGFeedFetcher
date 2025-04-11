@@ -1,4 +1,6 @@
-﻿using FeedFetcher.Utilities;
+﻿using FeedFetcher.Interfaces;
+using FeedFetcher.IOCAndServices;
+using FeedFetcher.Utilities;
 using FeedFetcher.ViewModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -15,11 +17,13 @@ namespace FeedFetcher
     public partial class MainWindow : Window
     {
         public static MainWindow wd { get; set; }
+        private ILogger logger {  get; set; }
         private MainViewModel Instance;
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
         public MainWindow()
         {
             InitializeComponent();
+            logger = InstanceProvider.GetInstance<ILogger>();
             Instance = MainViewModel.Instance;
             MainGrid.DataContext = Instance;
             wd = this;
@@ -36,6 +40,7 @@ namespace FeedFetcher
             else
             {
                 Status.Visibility = Visibility.Collapsed;
+                logger.Log("Welcome !");
                 Status.Text = string.Empty;
                 LicenseBorder.Visibility = Visibility.Collapsed;
                 HomeGrid.Visibility = Visibility.Visible;

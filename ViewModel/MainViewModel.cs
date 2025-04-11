@@ -176,7 +176,7 @@ namespace FeedFetcher.ViewModel
                                 {
                                     var instance = Processor.Processor.Instance;
                                     instance.Init(Sessions.GetRandomItem());
-                                    await instance.Start(id,tokenSource.Token);
+                                    await instance.Start(id,tokenSource.Token,this);
                                 });
                                 tokenSource.Token.ThrowIfCancellationRequested();
                                 break;

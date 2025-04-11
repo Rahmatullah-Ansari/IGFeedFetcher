@@ -2,6 +2,7 @@
 using FeedFetcher.IOCAndServices;
 using FeedFetcher.Models;
 using FeedFetcher.Utilities;
+using FeedFetcher.ViewModel;
 
 namespace FeedFetcher.Processor
 {
@@ -15,7 +16,7 @@ namespace FeedFetcher.Processor
             logger = InstanceProvider.GetInstance<ILogger>();
         }
         private SessionModel session {  get; set; }
-        public async Task Start(string Profileid,CancellationToken token)
+        public async Task Start(string Profileid,CancellationToken token, MainViewModel mainViewModel)
         {
             try
             {
@@ -25,6 +26,20 @@ namespace FeedFetcher.Processor
                 if(feedResponse != null && feedResponse.HasFeed)
                 {
                     await PostFeed(Profileid, feedResponse?.JsonResponse);
+                    token.ThrowIfCancellationRequested();
+                    ThreadFactory.Instance.Start(() =>
+                    {
+                        foreach (var data in feedResponse?.FeedsCollection)
+                        {
+                            token.ThrowIfCancellationRequested();
+                            mainViewModel.FeedCollections.Add(data);
+                        }
+                    });
+                    token.ThrowIfCancellationRequested();
+                }
+                else
+                {
+                    logger.Log($"{Profileid} Not Found Or Don't Have Feed");
                 }
             }
             catch (OperationCanceledException)
