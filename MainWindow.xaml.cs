@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace FeedFetcher
@@ -20,11 +21,14 @@ namespace FeedFetcher
         private ILogger logger {  get; set; }
         private MainViewModel Instance;
         private CancellationTokenSource tokenSource = new CancellationTokenSource();
+        public ICommand ToggleVisibilityCommand {  get; set; }
         public MainWindow()
         {
             InitializeComponent();
             logger = InstanceProvider.GetInstance<ILogger>();
             Instance = MainViewModel.Instance;
+            ToggleVisibilityCommand = new BaseCommand<object>(Tgl);
+            MainWindowContext.DataContext = this;
             MainGrid.DataContext = Instance;
             wd = this;
             if (!CV(string.Empty))
@@ -32,7 +36,7 @@ namespace FeedFetcher
                 HomeGrid.Visibility = Visibility.Collapsed;
                 this.Background = new SolidColorBrush(Colors.Transparent);
                 LicenseBorder.Visibility = Visibility.Visible;
-                LicenseBorder.Background = new SolidColorBrush(Color.FromRgb(91, 140, 144));
+                //LicenseBorder.Background = new SolidColorBrush(Color.FromRgb(91, 140, 144));
                 Status.Visibility = Visibility.Visible;
                 Status.Text = "Failed To Validate...";
                 return;
@@ -44,10 +48,17 @@ namespace FeedFetcher
                 Status.Text = string.Empty;
                 LicenseBorder.Visibility = Visibility.Collapsed;
                 HomeGrid.Visibility = Visibility.Visible;
-                this.Background = new SolidColorBrush(Color.FromRgb(91,140,144));
+                //this.Background = new SolidColorBrush(Color.FromRgb(91,140,144));
                 CHK();
             }
         }
+
+        private void Tgl(object obj)
+        {
+           Logger.Visibility = Logger.Visibility == Visibility.Collapsed?
+                Visibility.Visible : Visibility.Collapsed;
+        }
+
         private void WhileClosing(object sender, CancelEventArgs e)
         {
             try
@@ -144,7 +155,7 @@ namespace FeedFetcher
                 if (IsValid)
                 {
                     LicenseBorder.Visibility = Visibility.Collapsed;
-                    this.Background = new SolidColorBrush(Color.FromRgb(91, 140, 144));
+                    //this.Background = new SolidColorBrush(Color.FromRgb(91, 140, 144));
                     HomeGrid.Visibility = Visibility.Visible;
                     Status.Visibility = Visibility.Collapsed;
                     Status.Text = string.Empty;
@@ -154,7 +165,7 @@ namespace FeedFetcher
                 {
                     this.Background = new SolidColorBrush(Colors.Transparent);
                     LicenseBorder.Visibility = Visibility.Visible;
-                    LicenseBorder.Background = new SolidColorBrush(Color.FromRgb(91, 140, 144));
+                    //LicenseBorder.Background = new SolidColorBrush(Color.FromRgb(91, 140, 144));
                     HomeGrid.Visibility = Visibility.Collapsed;
                     Status.Visibility = Visibility.Visible;
                     Status.Text = "Failed to validate...";

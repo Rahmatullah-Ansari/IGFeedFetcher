@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows;
 using FeedFetcher.Interfaces;
 using FeedFetcher.Models;
 using FeedFetcher.Utilities;
@@ -18,13 +19,16 @@ namespace FeedFetcher.ViewModel
         {
             try
             {
-                Logs.Add(new LogModel
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    Message = message,
-                    DateTime = DateTime.Now.ToString("dd-MM-yyyy hh:mm:ss tt")
+                    Logs.Add(new LogModel
+                    {
+                        Message = message,
+                        DateTime = DateTime.Now.ToString("dd-MM-yyyy hh:mm:ss tt")
+                    });
+                    if (Logs.Count > 500)
+                        Logs.RemoveAt(Logs.Count - 1);
                 });
-                if (Logs.Count > 500)
-                    Logs.RemoveAt(Logs.Count - 1);
             }
             catch { }
         }

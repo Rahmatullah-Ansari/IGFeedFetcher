@@ -7,7 +7,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
     <Grid x:Name="MainGrid">
-        <ListView ItemsSource="{Binding Logs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+        <ListView
+            ItemsSource="{Binding Logs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            ScrollViewer.HorizontalScrollBarVisibility="Auto"
+            ScrollViewer.VerticalScrollBarVisibility="Auto">
             <ListView.View>
                 <GridView>
                     <GridViewColumn DisplayMemberBinding="{Binding DateTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header="Date Time" />

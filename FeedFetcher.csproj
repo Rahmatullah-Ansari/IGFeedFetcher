@@ -11,11 +11,18 @@
 
   <ItemGroup>
     <None Remove="AIBot.png" />
+    <None Remove="circuit.jpeg" />
     <None Remove="comment.png" />
     <None Remove="IG.ico" />
     <None Remove="Like.png" />
     <None Remove="NVidia.jpg" />
     <None Remove="share.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="circuit.jpeg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>

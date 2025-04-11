@@ -1,4 +1,6 @@
 ﻿using FeedFetcher.API;
+using FeedFetcher.Interfaces;
+using FeedFetcher.IOCAndServices;
 using FeedFetcher.Models;
 using FeedFetcher.Response;
 using InstagramApiSharp;
@@ -20,8 +22,13 @@ namespace FeedFetcher.Utilities
     {
         private static HttpHelper instance;
         private InstaAPI api { get; set; }
+        private ILogger logger;
         public static HttpHelper Instance => instance ?? (instance = new HttpHelper());
-        private InstagramUser InstagramUser { get; set; }= new InstagramUser();
+        private InstagramUser InstagramUser { get; set; } = new InstagramUser();
+        public HttpHelper()
+        {
+            logger = InstanceProvider.GetInstance<ILogger>();
+        }
         private static JsonJArrayHandler handler => JsonJArrayHandler.GetInstance;
         public string SessionString { get; set; }
         public void SetSession(SessionModel session)
@@ -32,13 +39,27 @@ namespace FeedFetcher.Utilities
             InstagramUser.Password = session.Password;
             api = InstaAPI.Instance(new InstagramAccount { Cookies = session.CookieString, Username = InstagramUser.Username, Password = InstagramUser.Password });
         }
-        public SessionRequestParam WEBLogin(string profileUrl="")
+        public async Task<bool> IsAuthenticated(SessionModel session)
+        {
+            try
+            {
+                api = await api.Build();
+                if (api.instaApi.IsUserAuthenticated)
+                {
+                    var str = await api.instaApi.GetStateDataAsStringAsync();
+                    session.CookieString = str;
+                }
+                return api.instaApi.IsUserAuthenticated;
+            }
+            catch { return false; }
+        }
+        public SessionRequestParam WEBLogin(string profileUrl = "")
         {
             var finalResponse = string.Empty;
             var reqParam = GetSessionParam();
             try
             {
-                var url = string.IsNullOrEmpty(profileUrl) ? "https://www.instagram.com":profileUrl;
+                var url = string.IsNullOrEmpty(profileUrl) ? "https://www.instagram.com" : profileUrl;
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                 SetProxy(ref request);
                 request.Method = "GET";
@@ -380,7 +401,7 @@ namespace FeedFetcher.Utilities
         //    }
         //    catch { return text; }
         //}
-        public async Task<FeedResponseHandler> GetFeedResponse(string profileUrl,bool IsMobile=false)
+        public async Task<FeedResponseHandler> GetFeedResponse(string profileUrl, bool IsMobile = false)
         {
             var response = new FeedResponseHandler();
             try
@@ -403,8 +424,21 @@ namespace FeedFetcher.Utilities
                     request.Headers["sec-fetch-site"] = "same-origin";
                     request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36";
                     request.Headers["x-ig-app-id"] = "936619743392459";
+                    try
+                    {
+                        var jsons = this.SessionString.Deserialize<List<cookies>>();
+                        var collections = new CookieContainer();
+                        foreach (cookies cookie in jsons)
+                        {
+                            collections.Add(new Cookie { Name = cookie.name, Value = cookie.value, Domain = cookie.domain });
+                        }
+                        request.CookieContainer = collections;
+                    }
+                    catch (Exception)
+                    {
+                    }
                     var res = await request.GetResponseAsync() as HttpWebResponse;
-                    return new FeedResponseHandler(GetDecodedResponse(res.GetResponseStream(),res?.ContentEncoding));
+                    return new FeedResponseHandler(GetDecodedResponse(res.GetResponseStream(), res?.ContentEncoding));
                     #region Mobile Login
                     //profileUrl = GetProfileUrl(profileUrl);
                     //var reqParam = WEBLogin(profileUrl);
@@ -493,7 +527,11 @@ namespace FeedFetcher.Utilities
                 }
 
             }
-            catch { }
+            catch (Exception e)
+            {
+                response.NotFound = true;
+                logger.Log($"{profileUrl} Error ==> {e?.Message}");
+            }
             return response;
         }
 
@@ -520,7 +558,7 @@ namespace FeedFetcher.Utilities
                 request.ContentLength = buffer.Length;
                 var requestStream = await request.GetRequestStreamAsync();
                 requestStream.Write(buffer, 0, buffer.Length);
-                var response =await request.GetResponseAsync();
+                var response = await request.GetResponseAsync();
                 return new StreamReader(response.GetResponseStream()).ReadToEnd();
             }
             catch { return string.Empty; }

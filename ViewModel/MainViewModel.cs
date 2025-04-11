@@ -181,7 +181,7 @@ namespace FeedFetcher.ViewModel
                                 tokenSource.Token.ThrowIfCancellationRequested();
                                 break;
                             }
-                            break;
+                            //break;
                         }
                         await Task.Delay(TimeSpan.FromSeconds(20),tokenSource.Token);
                         tokenSource.Token.ThrowIfCancellationRequested();
@@ -207,22 +207,30 @@ namespace FeedFetcher.ViewModel
             pagination = finalResponse.model;
             return finalResponse.ListIDS;
         }
-        private void AddSessionExecute(object obj)
+        private async void AddSessionExecute(object obj)
         {
             try
             {
                 var session = obj as TextBox;
-                if (!string.IsNullOrEmpty(session.Text))
+                if (!string.IsNullOrEmpty(session.Text)
+                    ||(!string.IsNullOrEmpty(Username)
+                    && !string.IsNullOrEmpty(Password)))
                 {
                     var model = new SessionModel
                     {
                         Index = Sessions.Count + 1,
                         CookieString = session.Text,
+                        Username = Username,
+                        Password = Password,
                         cookies = handler.Deserialize<List<cookies>>(session.Text)
                     };
+                    httpHelper.SetSession(model);
+                    model.Status = await httpHelper.IsAuthenticated(model) ? "Success" : "Failed";
                     Sessions.Add(model);
                     FileUtility.SaveSession(handler.Serialize(Sessions));
                     session.Text = string.Empty;
+                    Username = string.Empty;
+                    Password = string.Empty;
                 }
             }
             catch { }

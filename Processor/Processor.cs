@@ -21,7 +21,7 @@ namespace FeedFetcher.Processor
             try
             {
                 var feedResponse = await httpHelper.GetFeedResponse(Profileid);
-                if (feedResponse is null || !feedResponse.HasFeed)
+                if (feedResponse is null || (!feedResponse.HasFeed && !feedResponse.NotFound))
                     feedResponse = await httpHelper.GetFeedResponse(Profileid, true);
                 if(feedResponse != null && feedResponse.HasFeed)
                 {
@@ -32,7 +32,7 @@ namespace FeedFetcher.Processor
                         foreach (var data in feedResponse?.FeedsCollection)
                         {
                             token.ThrowIfCancellationRequested();
-                            mainViewModel.FeedCollections.Add(data);
+                            MainViewModel.Instance.FeedCollections.Add(data);
                         }
                     });
                     token.ThrowIfCancellationRequested();

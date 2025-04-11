@@ -7,6 +7,7 @@ namespace FeedFetcher.Response
     public class FeedResponseHandler
     {
         public bool HasFeed { get; set; } = true;
+        public bool NotFound { get; set; } = false;
         public ObservableCollection<FeedModels>
             FeedsCollection = new ObservableCollection<FeedModels>();
         private JsonJArrayHandler handler => JsonJArrayHandler.GetInstance;

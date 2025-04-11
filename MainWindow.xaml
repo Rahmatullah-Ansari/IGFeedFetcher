@@ -6,6 +6,7 @@
     xmlns:local="clr-namespace:FeedFetcher"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:view="clr-namespace:FeedFetcher.Views"
+    x:Name="MainWindowContext"
     Title="Instagram"
     Width="800"
     Height="450"
@@ -14,6 +15,13 @@
     WindowStartupLocation="CenterScreen"
     WindowState="Maximized"
     mc:Ignorable="d">
+    <Window.InputBindings>
+        <!--  Ctrl + H key binding  -->
+        <KeyBinding
+            Key="L"
+            Command="{Binding ToggleVisibilityCommand}"
+            Modifiers="Control" />
+    </Window.InputBindings>
     <Window.Background>
         <ImageBrush ImageSource="/NVidia.jpg" />
     </Window.Background>
@@ -26,6 +34,9 @@
             BorderBrush="White"
             BorderThickness="2"
             CornerRadius="30,0,30,0">
+            <Border.Background>
+                <ImageBrush ImageSource="/NVidia.jpg" />
+            </Border.Background>
             <StackPanel Margin="10,0" Orientation="Vertical">
                 <Image
                     Width="100"
@@ -56,7 +67,7 @@
                     x:Name="Status"
                     HorizontalAlignment="Center"
                     FontSize="14"
-                    Foreground="White" />
+                    Foreground="Red" />
                 <Border
                     MinWidth="200"
                     Margin="10,10,10,20"
@@ -77,6 +88,9 @@
             </StackPanel>
         </Border>
         <Grid x:Name="HomeGrid">
+            <Grid.Background>
+                <ImageBrush ImageSource="/circuit.jpeg" Opacity="0.4" />
+            </Grid.Background>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -243,9 +257,10 @@
                             <ScrollViewer
                                 Grid.Row="1"
                                 MinHeight="200"
+                                MaxHeight="400"
                                 Margin="5,3"
-                                HorizontalScrollBarVisibility="Auto"
-                                VerticalScrollBarVisibility="Auto">
+                                HorizontalScrollBarVisibility="Disabled"
+                                VerticalScrollBarVisibility="Disabled">
                                 <ListView
                                     x:Name="SessionListView"
                                     ItemsSource="{Binding Sessions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -261,17 +276,17 @@
                                             <GridView.Columns>
                                                 <GridViewColumn DisplayMemberBinding="{Binding Index, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header=" S.NO " />
                                                 <GridViewColumn DisplayMemberBinding="{Binding Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Header=" Username " />
-                                                <GridViewColumn Width="200" Header=" Session ">
+                                                <GridViewColumn Header=" Session ">
                                                     <GridViewColumn.CellTemplate>
                                                         <DataTemplate>
-                                                            <TextBox
-                                                                Width="500"
-                                                                Height="100"
-                                                                IsEnabled="False"
-                                                                ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                                                                ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                                                Text="{Binding CookieString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                                TextWrapping="WrapWithOverflow" />
+                                                            <ScrollViewer Width="500" Height="100">
+                                                                <TextBlock
+                                                                    IsEnabled="True"
+                                                                    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                                                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                                    Text="{Binding CookieString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                                    TextWrapping="WrapWithOverflow" />
+                                                            </ScrollViewer>
                                                         </DataTemplate>
                                                     </GridViewColumn.CellTemplate>
                                                 </GridViewColumn>
@@ -290,10 +305,11 @@
                         Foreground="White"
                         Header="Instagram Feed"
                         IsExpanded="True">
-                        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                             <ListView
                                 x:Name="FeedListView"
                                 MinHeight="200"
+                                MaxHeight="400"
                                 Margin="5,10"
                                 ItemsSource="{Binding FeedCollections, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                 <ListView.ItemsPanel>
@@ -364,7 +380,13 @@
                     </Expander>
                 </Grid>
             </ScrollViewer>
-            <view:LoggerView Grid.Row="2" MinHeight="200" />
+            <view:LoggerView
+                x:Name="Logger"
+                Grid.Row="2"
+                MinHeight="200"
+                MaxHeight="300"
+                Margin="15,10"
+                Visibility="Collapsed" />
             <DockPanel Grid.Row="3" Margin="10">
                 <TextBlock
                     FontWeight="DemiBold"

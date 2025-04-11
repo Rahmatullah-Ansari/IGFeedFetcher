@@ -1,6 +1,8 @@
 ﻿using FeedFetcher.Models;
+using FeedFetcher.Utilities;
 using InstagramApiSharp.API;
 using InstagramApiSharp.API.Builder;
+using InstagramApiSharp.Classes;
 using System.Net;
 using System.Net.Http;
 

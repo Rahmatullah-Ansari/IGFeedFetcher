@@ -4,7 +4,7 @@ namespace FeedFetcher.Models
 {
     public class cookies
     {
-        public string domian {  get; set; }
+        public string domain {  get; set; }
         public string expirationDate {  get; set; }
         public bool hostOnly {  get; set; }
         public bool httpOnly {  get; set; }
